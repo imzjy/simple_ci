@@ -49,9 +49,8 @@ def bitbucket():
             if branch not in recipe.branchs:
                 break
 
-            print recipe.script
             if recipe.script == 'ssh':
-                run_ssh_script(ssh_config.cmd, branch, ssh_config)
+                run_ssh_script(recipe.ssh, branch)
             if recipe.script == 'local':
                 run_local_script(recipe.cmd, branch)
     except:
@@ -85,7 +84,7 @@ def github():
                     break
 
                 if recipe.script == 'ssh':
-                    run_ssh_script(recipe.cmd, branch, ssh_config)
+                    run_ssh_script(recipe.ssh, branch)
                 if recipe.script == 'local':
                     run_local_script(recipe.cmd, branch)
     except:
@@ -93,9 +92,9 @@ def github():
     return 'ok'
 
  
-def run_ssh_script(script_name, branch, ssh_config):
+def run_ssh_script(ssh_config, branch):
     print "deploy branch of %s" % branch
-    deploy_script = "sh %s %s" % (script_name, branch)
+    deploy_script = "sh %s %s" % (ssh_config.cmd, branch)
  
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
