@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import urllib
 import codecs
 import subprocess
@@ -9,7 +10,10 @@ import qjson
 from datetime import datetime
 from flask import Flask, request
 
+# globals
 app = Flask(__name__)
+CURPATH = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(CURPATH, 'config.json')
 
 def now():
     return datetime.utcnow()
@@ -18,7 +22,7 @@ def parse_config():
     '''
     return json playload object
     '''
-    with codecs.open('config.json', 'r', 'utf-8') as f:
+    with codecs.open(CONFIG_PATH, 'r', 'utf-8') as f:
         return qjson.loads(f.read())
 
 
