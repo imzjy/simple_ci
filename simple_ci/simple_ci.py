@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import urllib
+import codecs
+import subprocess
 import paramiko
 import qjson
 from datetime import datetime
@@ -8,9 +10,20 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
+def now():
+    return datetime.utcnow()
+
+def parse_config():
+    '''
+    return json playload object
+    '''
+    with codecs.open('config.json', 'r', 'utf-8') as f:
+        return qjson.loads(f.read())
+
+
 @app.route("/")
 def hello():
-    return ("Simple CI Server: %s" % datetime.now())
+    return ("Simple CI Server: %s" % now())
  
 @app.route("/bitbucket", methods=["POST"])
 def bitbucket():
@@ -26,7 +39,7 @@ def bitbucket():
             cm = push_notice['commits'][0]
             print "%s %s %s" % (cm['raw_node'], cm['author'], cm['utctimestamp'])
             print cm['message']
-            ssh_script('deploy.sh', branch)
+            run_ssh_script('deploy.sh', branch)
     except ex:
         print ex
         return 'error'
@@ -39,28 +52,26 @@ def github():
     # print posted_data
     try:
         push_notice = qjson.loads(posted_data)
+        config  = parse_config()
 
-        if 'zen' in push_notice:
+        if hasattr(push_notice, 'zen'):
             print push_notice.zen
+            return 'ping...ok!'
 
-        if 'ref' in push_notice:
+        if hasattr(push_notice, 'ref'):
             print push_notice.ref
 
-        # branch = push_notice['commits'][0]['branch']
-        # print branch
-        
-        # if branch in ('master', 'online') :
-        #     cm = push_notice['commits'][0]
-        #     print "%s %s %s" % (cm['raw_node'], cm['author'], cm['utctimestamp'])
-        #     print cm['message']
-        #     local_script('deploy.sh', branch)
-    except ex:
-        print ex
-        return 'error'
-    return ''
+            branch = push_notice.ref.split('/')[-1]
+            print branch
+            
+            if branch in config.branchs :
+                run_local_script(config.path, branch)
+    except:
+        raise
+    return 'ok'
 
  
-def ssh_script(script_name, branch):
+def run_ssh_script(script_name, branch):
     print "deploy branch of %s" % branch
     deploy_script = "sh %s %s" % (script_name, branch)
  
@@ -73,8 +84,9 @@ def ssh_script(script_name, branch):
         print m,
     ssh.close()
 
-def local_script(script_name, branch):
-    pass
+def run_local_script(script_path, branch):
+    print 'run local script'
+    subprocess.call(script_path + ' ' + branch, shell=True)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=4040)
+    app.run(host="0.0.0.0", port=4040, debug=True)
