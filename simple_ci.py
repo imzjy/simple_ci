@@ -36,12 +36,23 @@ def bitbucket():
     posted_data = urllib.unquote_plus(posted_data)
     print posted_data
     try:
+        config  = get_config('github')
         push_notice = qjson.loads(posted_data.lstrip('payload='))
-        branch = push_notice.commits[0].branch
-        print branch
         
-        if branch in ('master', 'online') :
-            run_ssh_script('deploy.sh', branch)
+        repo = push_notice.repository.absolute_url.strip('/') 
+        branch = push_notice.commits[0].branch
+        print repo, ' ', branch
+
+        for recipe in config:
+            if repo != recipe.repo:
+                break
+            if branch not in recipe.branchs:
+                break
+
+            if recipe.script == 'ssh':
+                run_ssh_script(recipe.cmd, branch, ssh_config)
+            if recipe.script == 'local':
+                run_local_script(recipe.cmd, branch)
     except:
         raise
     return 'ok'
@@ -52,8 +63,8 @@ def github():
     # assert posted_data, 'post data is empty'
     # print posted_data
     try:
-        push_notice = qjson.loads(posted_data)
         config  = get_config('github')
+        push_notice = qjson.loads(posted_data)
 
         if hasattr(push_notice, 'zen'):
             print push_notice.zen
