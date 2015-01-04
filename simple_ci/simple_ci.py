@@ -35,22 +35,29 @@ def bitbucket():
 @app.route("/github", methods=["POST"])
 def github():
     posted_data = request.stream.read()
-    assert posted_data, 'post data is empty'
+    # assert posted_data, 'post data is empty'
     # print posted_data
     try:
-        push_notice = qjson.loads(urllib.unquote_plus(posted_data).lstrip('payload='))
-        branch = push_notice['commits'][0]['branch']
-        print branch
+        push_notice = qjson.loads(posted_data)
+
+        if 'zen' in push_notice:
+            print push_notice.zen
+
+        if 'ref' in push_notice:
+            print push_notice.ref
+
+        # branch = push_notice['commits'][0]['branch']
+        # print branch
         
-        if branch in ('master', 'online') :
-            cm = push_notice['commits'][0]
-            print "%s %s %s" % (cm['raw_node'], cm['author'], cm['utctimestamp'])
-            print cm['message']
-            local_script('deploy.sh', branch)
+        # if branch in ('master', 'online') :
+        #     cm = push_notice['commits'][0]
+        #     print "%s %s %s" % (cm['raw_node'], cm['author'], cm['utctimestamp'])
+        #     print cm['message']
+        #     local_script('deploy.sh', branch)
     except ex:
         print ex
         return 'error'
-    return posted_data
+    return ''
 
  
 def ssh_script(script_name, branch):
