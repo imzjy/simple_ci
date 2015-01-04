@@ -33,10 +33,10 @@ def hello():
 @app.route("/bitbucket", methods=["POST"])
 def bitbucket():
     posted_data = request.stream.read()
-    assert posted_data, 'post data is empty'
+    posted_data = urllib.unquote_plus(posted_data)
     print posted_data
     try:
-        push_notice = qjson.loads(urllib.unquote_plus(posted_data).lstrip('payload='))
+        push_notice = qjson.loads(posted_data.lstrip('payload='))
         branch = push_notice.commits[0].branch
         print branch
         
