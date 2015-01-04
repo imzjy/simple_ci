@@ -34,7 +34,7 @@ def hello():
 def bitbucket():
     posted_data = request.stream.read()
     assert posted_data, 'post data is empty'
-    # print posted_data
+    print posted_data
     try:
         push_notice = qjson.loads(urllib.unquote_plus(posted_data).lstrip('payload='))
         branch = push_notice.commits[0].branch
@@ -73,21 +73,21 @@ def github():
                     break
 
                 if recipe.script == 'ssh':
-                    run_ssh_script(recipe.path, branch)
+                    run_ssh_script(recipe.cmd, branch, ssh_config)
                 if recipe.script == 'local':
-                    run_local_script(recipe.path, branch)
+                    run_local_script(recipe.cmd, branch)
     except:
         raise
     return 'ok'
 
  
-def run_ssh_script(script_name, branch):
+def run_ssh_script(script_name, branch, ssh_config):
     print "deploy branch of %s" % branch
     deploy_script = "sh %s %s" % (script_name, branch)
  
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect('host', username='user', key_filename='private_key')
+    ssh.connect(ssh_config.host, ssh_config.user, ssh.ssh_key_file)
     stdin, stdout, stderr = ssh.exec_command(deploy_script)
     msgs = stdout.readlines()
     for m in msgs:

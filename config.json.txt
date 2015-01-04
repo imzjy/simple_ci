@@ -3,7 +3,7 @@
 		{
 			"repo": "jatsz/article",
 			"script" : "local",
-			"path": "/bin/echo 'args'",
+			"cmd": "/bin/echo 'args'",
 			"branchs" : ["master"]
 		}
 	],
@@ -11,7 +11,12 @@
 		{
 			"repo": "jatsz/vdg-website",
 			"script": "ssh",
-			"path": "/bin/echo ''",
+			"ssh": {
+				"host": "ip or hostname",
+				"user": "username",
+				"ssh_key_file": "/path/to/ssh_private_key",
+				"cmd": "/bin/echo 'hi'"
+			},
 			"branchs" : ["master", "online"]
 		}
 	]
