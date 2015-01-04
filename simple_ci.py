@@ -36,9 +36,9 @@ def bitbucket():
     posted_data = urllib.unquote_plus(posted_data)
     print posted_data
     try:
-        config  = get_config('github')
+        config  = get_config('bitbucket')
         push_notice = qjson.loads(posted_data.lstrip('payload='))
-        
+
         repo = push_notice.repository.absolute_url.strip('/') 
         branch = push_notice.commits[0].branch
         print repo, ' ', branch
@@ -49,8 +49,9 @@ def bitbucket():
             if branch not in recipe.branchs:
                 break
 
+            print recipe.script
             if recipe.script == 'ssh':
-                run_ssh_script(recipe.cmd, branch, ssh_config)
+                run_ssh_script(ssh_config.cmd, branch, ssh_config)
             if recipe.script == 'local':
                 run_local_script(recipe.cmd, branch)
     except:
