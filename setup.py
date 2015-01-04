@@ -25,6 +25,12 @@ setup(
     url='https://github.com/jatsz/simple_ci',
     download_url='https://github.com/jatsz/simple_ci/tarball/master',
 
+    install_requires=[
+        'Flask>=0.10.1',
+        'paramiko>=1.15.2',
+        'qjson>=0.1.9',
+    ]
+
     version=simple_ci.__version__,
     license=simple_ci.__license__,
 
