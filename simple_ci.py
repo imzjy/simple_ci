@@ -93,7 +93,7 @@ def github():
 
  
 def run_ssh_script(ssh_config, branch):
-    print "deploy branch of %s" % branch
+    print "run ssh script: %s %s" % (ssh_config.cmd, branch)
     deploy_script = "sh %s %s" % (ssh_config.cmd, branch)
  
     ssh = paramiko.SSHClient()
@@ -105,9 +105,9 @@ def run_ssh_script(ssh_config, branch):
         print m,
     ssh.close()
 
-def run_local_script(script_path, branch):
-    print 'run local script'
-    subprocess.call(script_path + ' ' + branch, shell=True)
+def run_local_script(cmd, branch):
+    print 'run local script: %s %s' % (cmd, branch)
+    subprocess.call(cmd + ' ' + branch, shell=True)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=4040, debug=True)
