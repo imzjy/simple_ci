@@ -98,7 +98,7 @@ def run_ssh_script(ssh_config, branch):
  
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(ssh_config.host, ssh_config.user, ssh_config.ssh_key_file)
+    ssh.connect(ssh_config.host, username=ssh_config.user, key_filename=ssh_config.ssh_key_file)
     stdin, stdout, stderr = ssh.exec_command(deploy_script)
     msgs = stdout.readlines()
     for m in msgs:
