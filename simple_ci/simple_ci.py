@@ -18,12 +18,12 @@ CONFIG_PATH = os.path.join(CURPATH, 'config.json')
 def now():
     return datetime.utcnow()
 
-def parse_config():
+def get_config(hoster_name):
     '''
     return json playload object
     '''
     with codecs.open(CONFIG_PATH, 'r', 'utf-8') as f:
-        return qjson.loads(f.read())
+        return getattr(qjson.loads(f.read()), hoster_name)
 
 
 @app.route("/")
@@ -37,18 +37,14 @@ def bitbucket():
     # print posted_data
     try:
         push_notice = qjson.loads(urllib.unquote_plus(posted_data).lstrip('payload='))
-        branch = push_notice['commits'][0]['branch']
+        branch = push_notice.commits[0].branch
         print branch
         
         if branch in ('master', 'online') :
-            cm = push_notice['commits'][0]
-            print "%s %s %s" % (cm['raw_node'], cm['author'], cm['utctimestamp'])
-            print cm['message']
             run_ssh_script('deploy.sh', branch)
-    except ex:
-        print ex
-        return 'error'
-    return posted_data
+    except:
+        raise
+    return 'ok'
 
 @app.route("/github", methods=["POST"])
 def github():
@@ -57,7 +53,7 @@ def github():
     # print posted_data
     try:
         push_notice = qjson.loads(posted_data)
-        config  = parse_config()
+        config  = get_config('github')
 
         if hasattr(push_notice, 'zen'):
             print push_notice.zen
@@ -66,11 +62,20 @@ def github():
         if hasattr(push_notice, 'ref'):
             print push_notice.ref
 
+            repo = push_notice.repository.full_name
             branch = push_notice.ref.split('/')[-1]
-            print branch
-            
-            if branch in config.branchs :
-                run_local_script(config.path, branch)
+            print repo, ' ', branch
+
+            for recipe in config:
+                if repo != recipe.repo:
+                    break
+                if branch not in recipe.branchs:
+                    break
+
+                if recipe.script == 'ssh':
+                    run_ssh_script(recipe.path, branch)
+                if recipe.script == 'local':
+                    run_local_script(recipe.path, branch)
     except:
         raise
     return 'ok'
