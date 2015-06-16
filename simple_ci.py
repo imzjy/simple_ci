@@ -36,11 +36,13 @@ def bitbucket():
     posted_data = urllib.unquote_plus(posted_data)
     print posted_data
     try:
+        if posted_data.startswith('payload') :
+	    return 'ok'
         config  = get_config('bitbucket')
-        push_notice = qjson.loads(posted_data.lstrip('payload='))
+        push_notice = qjson.loads(posted_data)
 
-        repo = push_notice.repository.absolute_url.strip('/') 
-        branch = push_notice.commits[0].branch
+        repo = push_notice.repository.full_name
+        branch = push_notice.push.changes[0].new.name
         print repo, ' ', branch
 
         for recipe in config:
@@ -52,7 +54,7 @@ def bitbucket():
             if recipe.script == 'ssh':
                 run_ssh_script(recipe.ssh, branch)
             if recipe.script == 'local':
-                run_local_script(recipe.cmd, branch)
+                run_local_script(recipe.cmd, '')
     except:
         raise
     return 'ok'
