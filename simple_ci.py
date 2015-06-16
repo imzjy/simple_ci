@@ -35,9 +35,10 @@ def bitbucket():
     posted_data = request.stream.read()
     posted_data = urllib.unquote_plus(posted_data)
     print posted_data
+    if posted_data.startswith('payload'):
+        return 'ok'
+    
     try:
-        if posted_data.startswith('payload') :
-	    return 'ok'
         config  = get_config('bitbucket')
         push_notice = qjson.loads(posted_data)
 
